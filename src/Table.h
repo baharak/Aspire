@@ -29,7 +29,7 @@ public:
 	list<Dish>::iterator dishp;
 	void addPoint(Vector& v);
 	void removePoint(Vector& v);
-	void addInitPoint(Vector& v);
+	void addInitPoint(const Vector& v);
 
 	void operator=(const Table& t);
 	void calculateCov(); // Fill covariance sampleCov , again scatter actually

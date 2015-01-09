@@ -32,19 +32,19 @@ Table::~Table(void)
 {
 }
 
-void Table::addInitPoint(Vector& v)
+void Table::addInitPoint(const Vector& v)
 {
-	sampleMean = ((sampleMean * npoints ) + v ) / (npoints + 1.0); 
-	sampleScatter  =  ( sampleScatter + (v>>v) ) ; 
+	sampleMean = ((sampleMean * npoints ) + v ) / (npoints + 1.0);
+	sampleScatter  =  ( sampleScatter + (v>>v) ) ;
 	npoints++;
 }
 
 void Table::addPoint(Vector& v)
 {
 	npoints++;  // npoint is current number of points in the table
-	Vector& diff = (v - sampleMean); // Get abstract of the output buffer
-	sampleScatter  =  ( sampleScatter + (diff>>diff)*((npoints-1.0)/(npoints))) ; 
-	sampleMean = ((sampleMean * (npoints-1) ) + v ) / (npoints); 
+	Vector diff = (v - sampleMean); // Get abstract of the output buffer
+	sampleScatter  =  ( sampleScatter + (diff>>diff)*((npoints-1.0)/(npoints))) ;
+	sampleMean = ((sampleMean * (npoints-1) ) + v ) / (npoints);
 	calculateDist();
 }
 
@@ -57,9 +57,9 @@ void Table::removePoint(Vector& v)
 
 	if (npoints > 1)
 	{
-		Vector& diff = (v - sampleMean); // Get abstract of the output buffer
-		sampleScatter  =  ( sampleScatter - (diff>>diff)*(npoints/(npoints-1.0))) ; 
-		sampleMean = ((sampleMean * (npoints/(npoints - 1.0))) - v *(1.0/(npoints - 1.0)))  ; 
+		Vector diff = (v - sampleMean); // Get abstract of the output buffer
+		sampleScatter  =  ( sampleScatter - (diff>>diff)*(npoints/(npoints-1.0))) ;
+		sampleMean = ((sampleMean * (npoints/(npoints - 1.0))) - v *(1.0/(npoints - 1.0)))  ;
 		npoints--;
 		calculateDist();
 	}
@@ -69,13 +69,13 @@ void Table::removePoint(Vector& v)
 		sampleMean.zero();
 		npoints--;
 	}
-	
+
 
 
 	// Table updates
 }
 
-// Vector assignment allocates memory if does not have any or uses previous one 
+// Vector assignment allocates memory if does not have any or uses previous one
 // So this avoids extra allocations
 Table::Table(const Table& t)
 {
@@ -106,10 +106,10 @@ void Table::calculateCov()
 void Table::calculateDist()
 {
 	double s1=dishp->kap + npoints;
-	dist.eta = m + 1 + dishp->nsamples + this->npoints - d - dishp->ntables ; 
+	dist.eta = m + 1 + dishp->nsamples + this->npoints - d - dishp->ntables ;
 	dist.mu = (sampleMean*(npoints/s1) + dishp->dist.mu * (dishp->kap/s1) ) ;
-	Vector& diff = dishp->dist.mu - sampleMean;
-	dist.cholsigma = 
+	Vector diff = dishp->dist.mu - sampleMean;
+	dist.cholsigma =
 		((Psi + dishp->sampleScatter + sampleScatter +
 		((diff)>>(diff))
 		*(npoints*dishp->kap /(s1)))
@@ -122,11 +122,11 @@ ostream& operator<<(ostream& os, const Table& t)
 
 	// os should be binary file
 	int dishid = t.dishp->dishid;
-	os.write((char*) &t.tableid,sizeof(int)); 
-	os.write((char*) &dishid,sizeof(int)); 
-	os.write((char*) &t.npoints,sizeof(int)); 
-	// os.write((char*) &t.logprob,sizeof(double)); 
-	os.write((char*) &t.loglikelihood,sizeof(double)); 
+	os.write((char*) &t.tableid,sizeof(int));
+	os.write((char*) &dishid,sizeof(int));
+	os.write((char*) &t.npoints,sizeof(int));
+	// os.write((char*) &t.logprob,sizeof(double));
+	os.write((char*) &t.loglikelihood,sizeof(double));
 	os << t.sampleScatter;
 	os << t.sampleMean;
 	os << t.dist;

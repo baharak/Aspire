@@ -18,8 +18,8 @@ public:
 	~Stut(void);
 
 	double calculateNormalizer();
-	double likelihood(Vector& x);
-	Vector likelihood(Matrix& mat);
+	double likelihood(const Vector& x);
+	Vector likelihood(const Matrix& mat);
 
 	friend ostream& operator<<(ostream& os, const Stut& t);
 };

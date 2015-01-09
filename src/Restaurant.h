@@ -20,7 +20,7 @@ public:
 
 	void addTable(Table& t);
 	Restaurant(void);
-	
+
 	~Restaurant(void);
 	void run(int id);
 

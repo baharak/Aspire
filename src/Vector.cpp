@@ -1,5 +1,6 @@
 #include "Vector.h"
 #include "Matrix.h"
+#include <cstring>
 #include <new>
 
 MultiBuffer<Vector> buffer;
@@ -51,10 +52,6 @@ double Vector::operator*(Vector& v) // Dot product
 		res += data[i] * v.data[i];
 
 	return res;
-}
-
-inline double& Vector::operator[](const int i){
-		return data[i];
 }
 
 /* Return integer value */
@@ -200,7 +197,7 @@ Vector Vector::operator*(double scalar)
 	return buffer.next();
 }
 
-Vector Vector::operator-(Vector& v)
+Vector Vector::operator-(const Vector& v) const
 {
 	Vector& r = buffer.get();
 	for(int i=0;i<n;i++)
@@ -208,7 +205,7 @@ Vector Vector::operator-(Vector& v)
 	return buffer.next();
 }
 
-Vector Vector::operator+(Vector& v)
+Vector Vector::operator+(const Vector& v)
 {
 	Vector& r = buffer.get();
 	for(int i=0;i<n;i++)
@@ -227,7 +224,7 @@ Vector Vector::operator/(double scalar)
 }
 
 
-Matrix Vector::operator>>(Vector& v) // Outer product
+Matrix Vector::operator>>(const Vector& v) const // Outer product
 {
 	int i,j,vn;
 	Matrix& mat = matbuffer.get();
@@ -253,9 +250,9 @@ double Vector::maximum()
 ostream& operator<<(ostream& os, const Vector& v)
 {   // It does not save type , it save as real vector always
 	int one = 1;
-	os.write((char*) &v.n,sizeof(int)); 
-	os.write((char*) &one,sizeof(int)); 
-	os.write((char*) v.data,sizeof(double)*v.n); 
+	os.write((char*) &v.n,sizeof(int));
+	os.write((char*) &one,sizeof(int));
+	os.write((char*) v.data,sizeof(double)*v.n);
 
 	return os;
 }

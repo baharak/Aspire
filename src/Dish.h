@@ -11,10 +11,10 @@ class Table;
 class Dish : public Global
 {
 public:
-	friend Global;
+	friend class Global;
 	Stut dist;
 	Dish(Stut t);
-	Dish(int d); 
+	Dish(int d);
 	Dish();
 
 	int dishid;

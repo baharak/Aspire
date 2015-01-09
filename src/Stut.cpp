@@ -3,7 +3,7 @@
 
 Stut::Stut(Vector mean,Matrix cov,int dof)
 {
-	
+
 	mu = mean;
 	cholsigma = cov.chol();
 	eta = dof;
@@ -21,7 +21,7 @@ double Stut::calculateNormalizer()
 
 Stut::Stut()
 {
-	coef1 = 0; 
+	coef1 = 0;
 	eta = 0;
 	d= 0;
 	normalizer = 0;
@@ -30,7 +30,7 @@ Stut::Stut()
 
 Stut::Stut(int d) : Normal(d)
 {
-	coef1 = 0; 
+	coef1 = 0;
 	eta = 0;
 	normalizer = 0;
 }
@@ -41,14 +41,14 @@ Stut::~Stut(void)
 }
 
 
-double Stut::likelihood(Vector& x)
+double Stut::likelihood(const Vector& x)
 {
 	Vector v =  (x  - mu)/cholsigma; // Copy constructor
 	double distsq = v*v;
 	return normalizer - coef1*log(1+distsq/eta);
 }
 
-Vector Stut::likelihood(Matrix& mat)
+Vector Stut::likelihood(const Matrix& mat)
 {
 	int i;
 	Vector res(mat.r);
@@ -60,9 +60,9 @@ Vector Stut::likelihood(Matrix& mat)
 
 ostream& operator<<(ostream& os, const Stut& t)
 {
-	os.write((char*) &t.eta,sizeof(double)); 
-	os.write((char*) &t.normalizer,sizeof(double)); 
-	os.write((char*) &t.coef1,sizeof(double)); 
+	os.write((char*) &t.eta,sizeof(double));
+	os.write((char*) &t.normalizer,sizeof(double));
+	os.write((char*) &t.coef1,sizeof(double));
 	os << t.mu;
 	os << t.cholsigma;
 	return os;

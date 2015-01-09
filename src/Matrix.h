@@ -16,18 +16,18 @@ public:
 	Matrix(const Matrix& mat);			// Copy
 									// 1 is standart , 2  is persistent , 0 is abstract
 	~Matrix(void);
-	
+
 	void readMatrix(char* filename);
 	void writeMatrix(char* filename);
 	void readBin(char* filename);
 	void writeBin(char* filename);
-	
 
-	Vector operator()(int i);   // Get row
+
+	Vector operator()(int i) const;   // Get row
 	Matrix operator*(double scalar);
 	void   operator=(const Matrix& m);
-	Matrix operator+(Matrix& v);	// Summation
-	Matrix operator-(Matrix& v);	// Subtract
+	Matrix operator+(const Matrix& v);	// Summation
+	Matrix operator-(const Matrix& v);	// Subtract
 	Matrix operator/(double scalar); // Scaling
 	Matrix operator<=(const Matrix& mat); //Point by Abstract Matrix
 	void zero();

@@ -7,7 +7,7 @@
 #include "Dish.h"
 #include "Restaurant.h"
 #include "Customer.h"
-#include <thread>  
+#include <thread>
 #include <iostream>
 
 
@@ -17,12 +17,21 @@ using namespace std;
 int MAX_SWEEP=100;
 int BURNIN=10;
 int SAMPLE= 10;// Default value is 10 sample + 1 post burnin
-char* result_dir = "./";
+const char* result_dir = "./";
 
 // Variables
 int d,n;
 double m,kep,eta;
 
+namespace {
+void copyRestaurants(vector<Restaurant>& dest, vector<Restaurant>& src) {
+  dest.clear();
+  dest.resize(src.size());
+  size_t i = 0;
+  for (auto& r : src)
+    dest[i++] = r;            // using the weird operator=(Restaurant&)
+}
+}
 
 PILL_DEBUG
 int main(int argc,char** argv)
@@ -44,7 +53,7 @@ int main(int argc,char** argv)
 	SAMPLE = (MAX_SWEEP-BURNIN)/10; // Default value
 	if (argc>8)
 		SAMPLE = atoi(argv[8]);
-	
+
 	step();
 					 // Computing buffer
 	string ss(result_dir);
@@ -58,25 +67,25 @@ int main(int argc,char** argv)
 	eta = ds.m - d + 2;
 
 	precomputeGammaLn(2*(n+d)+1);  // With 0.5 increments
-	init_buffer(thread::hardware_concurrency(),d);	
-	
-	Vector priormean(d); 
-	
+	init_buffer(thread::hardware_concurrency(),d);
+
+	Vector priormean(d);
+
 	Matrix priorvariance(d,d);
-	
+
 	Global::Psi = ds.prior;
-	
+
 	Global::Psi.r = d; // Last row is shadowed
 	Global::Psi.n = d*d;
 	Global::mu0 =  ds.prior(ds.d).copy();
-	
+
 	Global::eta = eta;
 	priorvariance = Global::Psi*((kep+1)/((kep)*eta));
 	priormean = Global::mu0;
-	
-	Stut stt(priormean,priorvariance,eta); 
+
+	Stut stt(priormean,priorvariance,eta);
 	Vector loglik0;
-	
+
 	Dish emptyDish(stt);
 	vector<Restaurant> Restaurants;
 	vector<Restaurant> beststate;
@@ -88,7 +97,7 @@ int main(int argc,char** argv)
 	Table besttable;
 	Customer bestcustomer;
 	int i,j,k;
-	
+
 // INITIALIZATION
 	printf("Number of Cores : %d\n",thread::hardware_concurrency());
 
@@ -99,7 +108,7 @@ int main(int argc,char** argv)
 	Restaurants.resize(Restaurantids.n);
 	// customers.reserve(ds.n);
 	step();
-	
+
 	// One cluster for each object initially
 	franchise.push_back(Dish(ds.d));
 	list<Dish>::iterator firstDish = franchise.begin();
@@ -111,9 +120,9 @@ int main(int argc,char** argv)
 		Restaurants[i].Restaurantid = Restaurantids(i);
 		Restaurantit[Restaurantids(i)] = Restaurants.begin() + i;
 		Table t(firstDish); // First dish
-		Restaurants[i].addTable(t); 
+		Restaurants[i].addTable(t);
 	}
-	
+
 	// Create customers
 	vector<Restaurant>::iterator g;
 	for(i=0;i<ds.n;i++)
@@ -154,8 +163,8 @@ int main(int argc,char** argv)
 
 	double newdishprob,maxdishprob,sumprob,val,logprob,gibbs_score,best_score;
 	int kal=1;
-	gibbs_score = -my_infinity();
-	best_score = -my_infinity();
+	gibbs_score = -INFINITY;
+	best_score = -INFINITY;
 
 	Vector score(MAX_SWEEP+1);
 	for (int num_sweep = 0;num_sweep <= MAX_SWEEP ; num_sweep++)
@@ -163,10 +172,10 @@ int main(int argc,char** argv)
 		// Submit Jobs
 		// 1st Loop
 		for (i=0;i<Restaurants.size();i++)
-			tpool.submit(Restaurants[i]);	
+			tpool.submit(Restaurants[i]);
 		tpool.waitAll(); // Wait for finishing all jobs
 
-		
+
 
 		for(dit=franchise.begin();dit!=franchise.end();dit++) // For each dish
 		{
@@ -185,7 +194,7 @@ int main(int argc,char** argv)
 		{
 			dit->calculateDist();
 		}
-		
+
 
 		// 3rd Loop
 		for(dit=franchise.begin();dit!=franchise.end();dit++)
@@ -201,8 +210,8 @@ int main(int argc,char** argv)
 			for(tit=Restaurants[i].tables.begin();tit!=Restaurants[i].tables.end();tit++,kal++)
 			{
 				tit->dishp->removeCluster(*tit);
-				
-				if (tit->dishp->ntables==0) // Remove dish 
+
+				if (tit->dishp->ntables==0) // Remove dish
 					franchise.erase(tit->dishp);
 				else
 					tit->dishp->calculateDist();
@@ -211,7 +220,7 @@ int main(int argc,char** argv)
 					int sss = intable.size();
 					intable.clear();
 				}
-				
+
 
 				// Create list of customers
 				for(cit=Restaurants[i].customers.begin();cit!=Restaurants[i].customers.end();cit++)
@@ -220,14 +229,14 @@ int main(int argc,char** argv)
 						intable.push_back(cit);
 				}
 
-				
+
 				newdishprob = tit->npoints * log(Global::gamma);
 				for(points=intable.begin();points!=intable.end();points++)
 					newdishprob += (*points)->loglik0;
 
 				maxdishprob = newdishprob;
 
-				for(dit=franchise.begin();dit!=franchise.end();dit++) 
+				for(dit=franchise.begin();dit!=franchise.end();dit++)
 				{
 					logprob=0;
 					for(points=intable.begin();points!=intable.end();points++)
@@ -243,7 +252,7 @@ int main(int argc,char** argv)
 				}
 
 				sumprob=0;
-				for(dit=franchise.begin();dit!=franchise.end();dit++) 
+				for(dit=franchise.begin();dit!=franchise.end();dit++)
 				{
 					dit->logprob = exp(dit->logprob - maxdishprob);
 					sumprob += dit->logprob;
@@ -254,7 +263,7 @@ int main(int argc,char** argv)
 				double rrr = urand();
 				val = rrr*sumprob;
 
-				for(dit=franchise.begin();dit!=franchise.end();dit++) 
+				for(dit=franchise.begin();dit!=franchise.end();dit++)
 				{
 					if ((dit->logprob)>=val)
 						break;
@@ -276,7 +285,7 @@ int main(int argc,char** argv)
 		}
 
 
-		// 4th loop 
+		// 4th loop
 		for (i=0;i<Restaurants.size();i++)
 		{
 			// Each table
@@ -284,10 +293,10 @@ int main(int argc,char** argv)
 			{
 				tit->calculateDist();
 			}
-				
+
 		}
-		
-		
+
+
 		// Calculate Gibbs Score
 		gibbs_score = 0;
 		for (i=0;i<Restaurants.size();i++)
@@ -299,7 +308,10 @@ int main(int argc,char** argv)
 			bestdishes = franchise;
 			for (dit=franchise.begin(),ditc=bestdishes.begin();dit!=franchise.end();dit++,ditc++)
 				dit->copy = ditc ;
-			beststate = Restaurants;
+                        // XXX: weird because Restaurant::operator= changes RHS
+			// beststate = Restaurants;
+                        // so, instead of trying to fix operator=, copy manually
+                        copyRestaurants(beststate, Restaurants);
 		}
 
 		if  (((num_sweep-BURNIN)%SAMPLE)==0 && num_sweep >= BURNIN)
@@ -322,8 +334,11 @@ int main(int argc,char** argv)
 	franchise = bestdishes;
 	for (dit=franchise.begin(),ditc=bestdishes.begin();dit!=franchise.end();dit++,ditc++)
 				ditc->copy = dit;
-	Restaurants = beststate;
-	
+        // XXX: weird because Restaurant::operator= changes RHS
+	// Restaurants = beststate;
+        // so, instead of trying to fix operator=, copy manually
+        copyRestaurants(Restaurants, beststate);
+
 
 string s(result_dir);
 ofstream dishfile( s.append("Dish.dish"),ios::out | ios::binary); // Be careful result_dir should include '\'
@@ -343,7 +358,7 @@ ofstream labelsout( s.append("Labels.matrix"),ios::out | ios::binary);
 	dishfile.write((char*)& ndish,sizeof(int));
 	restfile.write((char*)& nrest,sizeof(int));
 
-	for(i=0,dit=franchise.begin();dit!=franchise.end();i++,dit++) 
+	for(i=0,dit=franchise.begin();dit!=franchise.end();i++,dit++)
 	{
 		dit->dishid = i+1;
 		dishfile <<  *dit;

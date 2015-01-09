@@ -60,8 +60,8 @@ void Restaurant::run(int id)
 		customers[i].table->removePoint(x);
 		// printf("%d\n",customers[i].table->npoints);
 		sum = 0;
-		
-		
+
+
 		npts = customers[i].table->npoints;
 
 		if (customers[i].table->npoints ==0 )
@@ -70,7 +70,7 @@ void Restaurant::run(int id)
 		/*for(tit=tables.begin();tit!=tables.end();tit++)
 			if (ki == tit->dishp)
 				subrest+= tit->npoints;*/
-		
+
 		newclust = customers[i].loglik0 + log(alpha); ///(subrest+alpha)
 		max = newclust;
 

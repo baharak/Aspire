@@ -26,29 +26,29 @@ public:
 	int type;
 	Vector(int size,int real=1);
 	~Vector(void);
-	
+
 	Vector (const Vector& v);
 	Vector (Vector&& v);
 	Vector();
-	
+
 
 	void print();
 	void zero();
 	void resize(int size);
 	Vector copy();		// Returns real vector
-	Vector unique();	// Returns unique values 
+	Vector unique();	// Returns unique values
 
 
-	inline double& operator[](const int i);
+	inline double& operator[](const int i) { return data[i]; }
 	int		operator()(int i);	 // Return integer
 	double operator*(Vector& v); // Inner product
-	Vector operator-(Vector& v); // Subtraction
+	Vector operator-(const Vector& v) const; // Subtraction
 	Vector operator/(Matrix& mat); // Cholesky matrix division
-	void operator=(const Vector& v); // Assignment 
+	void operator=(const Vector& v); // Assignment
 	Vector operator*(double scalar); // Scaling
-	Vector operator+(Vector& v);	// Summation
+	Vector operator+(const Vector& v);	// Summation
 	Vector operator/(double scalar); // Scaling
-	Matrix operator>>(Vector& v);	// Outer product
+	Matrix operator>>(const Vector& v) const;	// Outer product
 	double maximum();
 
 	friend ostream& operator<<(ostream& os, const Vector& v);

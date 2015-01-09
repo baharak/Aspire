@@ -4,7 +4,7 @@
 using namespace std;
 
 // Altough optimization methods of C++ avoids unnecessary copies it is still not sufficient for temprorary objects
-// This buffer creates a memory space for those calculations. I used templates to be generalizable. 
+// This buffer creates a memory space for those calculations. I used templates to be generalizable.
 
 template <class T>
 class Buffer
@@ -27,7 +27,7 @@ public:
 			data.emplace_back(dim);
 			data[j].type = real;
 
-			if (real == 0 && d>0)  // Altough it is not a good idea to first allocate then deallocate here , I don't want to change interface of constructors. 
+			if (real == 0 && d>0)  // Altough it is not a good idea to first allocate then deallocate here , I don't want to change interface of constructors.
 				free(data[j].data);
 		}
 	}
@@ -56,7 +56,7 @@ public:
 
 	~Buffer(void)
 	{
-	}	
+	}
 };
 
 
@@ -65,7 +65,7 @@ template <class T>
 class MultiBuffer
 {
 public:
-	thread_specific static int threadid;
+	thread_local static int threadid;
 	static int nthreads;
 	MultiBuffer(int nthreads,int buffersize,int dim,int real=2)
 	{
@@ -95,17 +95,17 @@ public:
 
 	inline double& operator[](const int i)
 	{
-		return data[threadid][i];	
+		return data[threadid][i];
 	}
 
 
 	~MultiBuffer(void){
-			
+
 	}
 	vector<Buffer<T>> data;
 };
 
 template <class T>
-int MultiBuffer<T>::threadid;
+thread_local int MultiBuffer<T>::threadid;
 template <class T>
 int MultiBuffer<T>::nthreads;
